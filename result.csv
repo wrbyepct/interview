@@ -1,0 +1,9 @@
+filename,predicted_digit,confidence
+img_0_label_6.png,6,1.0
+img_1_label_5.png,5,0.9999996423721313
+img_2_label_3.png,3,0.999958872795105
+img_3_label_4.png,4,0.9999960660934448
+img_4_label_7.png,7,0.9999998807907104
+img_5_label_8.png,8,0.9999834299087524
+img_6_label_6.png,6,0.9999978542327881
+img_7_label_7.png,7,0.9999998807907104
