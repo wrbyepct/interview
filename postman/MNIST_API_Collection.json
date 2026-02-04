@@ -1,0 +1,283 @@
+{
+	"info": {
+		"_postman_id": "mnist-api-testing-collection",
+		"name": "MNIST API Testing",
+		"description": "Manual API testing collection for MNIST digit recognition service. Tests health check, predictions with various image formats, and error handling.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Health Check",
+			"item": [
+				{
+					"name": "GET /health",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response has correct schema\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('status');",
+									"    pm.expect(jsonData.status).to.eql('ok');",
+									"});",
+									"",
+									"pm.test(\"Response time is less than 500ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(500);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/health",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"health"
+							]
+						},
+						"description": "Health check endpoint for verifying the API is running and responsive."
+					},
+					"response": []
+				}
+			],
+			"description": "Basic health check tests to verify API availability."
+		},
+		{
+			"name": "Predictions",
+			"item": [
+				{
+					"name": "POST /predict - PNG image",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response time is less than 2000ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(2000);",
+									"});",
+									"",
+									"pm.test(\"Response has correct structure\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.all.keys('digit', 'confidence');",
+									"});",
+									"",
+									"pm.test(\"Digit is in valid range\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.digit).to.be.a('number');",
+									"    pm.expect(jsonData.digit).to.be.at.least(0);",
+									"    pm.expect(jsonData.digit).to.be.at.most(9);",
+									"});",
+									"",
+									"pm.test(\"Confidence is in valid range\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.confidence).to.be.a('number');",
+									"    pm.expect(jsonData.confidence).to.be.at.least(0.0);",
+									"    pm.expect(jsonData.confidence).to.be.at.most(1.0);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": [],
+									"description": "Select a PNG image from saved_images/ folder (e.g., img_0_label_6.png)"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/predict",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"predict"
+							]
+						},
+						"description": "Test prediction endpoint with PNG image. Select an image from the saved_images/ folder to test digit recognition."
+					},
+					"response": []
+				},
+				{
+					"name": "POST /predict - JPG image",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response time is less than 2000ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(2000);",
+									"});",
+									"",
+									"pm.test(\"Response has correct structure\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.all.keys('digit', 'confidence');",
+									"});",
+									"",
+									"pm.test(\"Digit is in valid range\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.digit).to.be.a('number');",
+									"    pm.expect(jsonData.digit).to.be.at.least(0);",
+									"    pm.expect(jsonData.digit).to.be.at.most(9);",
+									"});",
+									"",
+									"pm.test(\"Confidence is in valid range\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.confidence).to.be.a('number');",
+									"    pm.expect(jsonData.confidence).to.be.at.least(0.0);",
+									"    pm.expect(jsonData.confidence).to.be.at.most(1.0);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": [],
+									"description": "Select a JPG/JPEG image. Convert PNG to JPG or use any JPG digit image."
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/predict",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"predict"
+							]
+						},
+						"description": "Test prediction endpoint with JPG/JPEG image format. API should accept both PNG and JPG images."
+					},
+					"response": []
+				}
+			],
+			"description": "Test prediction endpoint with valid image inputs."
+		},
+		{
+			"name": "Error Cases",
+			"item": [
+				{
+					"name": "POST /predict - Invalid file type",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});",
+									"",
+									"pm.test(\"Error message is present\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('detail');",
+									"    pm.expect(jsonData.detail).to.include('Invalid file type');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": [],
+									"description": "Select a non-image file (e.g., .txt, .pdf) to test error handling"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/predict",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"predict"
+							]
+						},
+						"description": "Test error handling for invalid file types. API should reject non-image files with 400 Bad Request."
+					},
+					"response": []
+				},
+				{
+					"name": "POST /predict - No file",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 422\", function () {",
+									"    pm.response.to.have.status(422);",
+									"});",
+									"",
+									"pm.test(\"Validation error is present\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('detail');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/predict",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"predict"
+							]
+						},
+						"description": "Test error handling when no file is provided. API should return 422 Unprocessable Entity for missing required parameter."
+					},
+					"response": []
+				}
+			],
+			"description": "Test error handling for invalid inputs and edge cases."
+		}
+	]
+}
