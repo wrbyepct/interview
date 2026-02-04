@@ -1,0 +1,59 @@
+# Version control
+.git
+.gitignore
+
+# Python artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+*.egg-info/
+*.egg
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Environment and secrets
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+
+# Large data files
+train.csv
+test.csv
+saved_images/
+sample_submission.csv
+
+# Documentation
+*.md
+docs/
+
+# Tests and notebooks
+tests/
+*.ipynb
+.ipynb_checkpoints/
+
+# Docker itself
+Dockerfile
+.dockerignore
+docker-compose.yml
+
+# Planning files
+.planning/
+.claude/
+
+# Images
+requirements.png
+
+# Postman files
+postman/
+
+# Test scripts
+test_api.py
