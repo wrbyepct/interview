@@ -1,378 +1,326 @@
-# MNIST Digit Recognition API
+# MNIST 手寫數字辨識 API
 
-A production-ready REST API for handwritten digit recognition (0-9) powered by a CNN-Transformer neural network. Built with FastAPI and PyTorch, this service accepts images of any size and returns predictions with confidence scores.
+一個可以辨識手寫數字（0-9）的 AI 服務。你只需要上傳一張數字圖片，它就會告訴你這是什麼數字，以及它有多確定這個答案。
 
 ![Python 3.13](https://img.shields.io/badge/python-3.13-blue)
 ![FastAPI](https://img.shields.io/badge/FastAPI-1.0.0-green)
 ![Docker Ready](https://img.shields.io/badge/docker-ready-blue)
 
-## Quick Start
+---
 
-Get your first prediction in 30 seconds:
+## 這個專案能做什麼？
+
+- **辨識手寫數字**：上傳一張手寫數字的圖片，AI 會告訴你這是 0 到 9 的哪個數字
+- **信心分數**：除了答案，還會告訴你 AI 有多確定（例如：98% 確定這是數字 7）
+- **支援各種圖片**：不管你的圖片是大是小、是彩色還是黑白，都可以處理
+- **容器化部署**：使用 Docker 技術，讓你可以在任何電腦上輕鬆執行
+
+---
+
+## 在開始之前，你需要準備什麼？
+
+### 必要軟體
+
+1. **Git**（用來下載專案）
+   - Windows：到 [git-scm.com](https://git-scm.com/download/win) 下載安裝
+   - Mac：開啟終端機輸入 `xcode-select --install`
+
+2. **Docker Desktop**（用來執行服務）
+   - 到 [docker.com](https://www.docker.com/products/docker-desktop/) 下載適合你作業系統的版本
+   - 安裝完成後，記得啟動 Docker Desktop
+
+### 如何確認軟體已經安裝好？
+
+開啟「終端機」（Mac）或「命令提示字元」（Windows，按 Win+R 輸入 `cmd`）：
 
 ```bash
-# Build the Docker image
-docker build -t mnist-api .
+# 確認 Git 已安裝
+git --version
+# 應該會顯示類似：git version 2.39.0
 
-# Run the container
-docker run -d -p 8000:8000 --name mnist mnist-api
-
-# Test prediction with example image
-curl -X POST http://localhost:8000/predict \
-  -F "file=@saved_images/img_0_label_6.png"
+# 確認 Docker 已安裝
+docker --version
+# 應該會顯示類似：Docker version 24.0.0
 ```
 
-Expected response:
+---
+
+## 第一步：下載專案
+
+打開終端機，輸入以下指令來下載這個專案：
+
+```bash
+# 下載專案到你的電腦
+git clone https://github.com/你的帳號/你的專案名稱.git
+
+# 進入專案資料夾
+cd 你的專案名稱
+```
+
+> **小提示**：請把上面的網址換成實際的 GitHub 網址
+
+---
+
+## 第二步：啟動服務
+
+### 2.1 建立 Docker 映像檔
+
+這個步驟會把所有需要的東西打包起來，大約需要 2-5 分鐘：
+
+```bash
+docker build -t mnist-api .
+```
+
+> **等待時會看到很多文字滾動，這是正常的！** 當你看到 `Successfully tagged mnist-api:latest` 就表示完成了。
+
+### 2.2 啟動服務
+
+```bash
+docker run -d -p 8000:8000 --name mnist mnist-api
+```
+
+這個指令做了什麼：
+- `-d`：讓服務在背景執行，不會佔用你的終端機
+- `-p 8000:8000`：讓你可以透過 `localhost:8000` 連到服務
+- `--name mnist`：幫這個服務取名叫 `mnist`，方便之後管理
+
+### 2.3 確認服務已經啟動
+
+等待約 40 秒讓 AI 模型載入，然後輸入：
+
+```bash
+curl http://localhost:8000/health
+```
+
+如果看到 `{"status":"ok"}`，恭喜你！服務已經成功啟動了！
+
+---
+
+## 第三步：開始辨識數字！
+
+### 方法一：使用終端機指令（最簡單）
+
+專案裡有一些測試用的數字圖片，讓我們試試看：
+
+```bash
+curl -X POST http://localhost:8000/predict -F "file=@saved_images/img_0_label_6.png"
+```
+
+你會看到類似這樣的結果：
+
 ```json
 {"digit": 6, "confidence": 0.9823}
 ```
 
-## Features
+這表示：
+- `digit: 6`：AI 認為這是數字 6
+- `confidence: 0.9823`：AI 有 98.23% 的信心這是正確答案
 
-- **Digit Recognition**: Predicts handwritten digits from 0-9
-- **Confidence Scores**: Returns prediction confidence (0.0-1.0)
-- **Flexible Input**: Accepts JPEG and PNG images of any size
-- **Auto-Processing**: Automatically resizes and converts images to 28x28 grayscale
-- **Docker Containerized**: Easy deployment with built-in health checks
-- **Concurrent Support**: Handles multiple simultaneous requests
-- **Production Ready**: Non-root user, proper signal handling, health monitoring
+### 方法二：使用你自己的圖片
 
-## Installation
-
-### Docker (Recommended)
+把你的圖片路徑換進去：
 
 ```bash
-# Build the image
-docker build -t mnist-api .
+# Windows 範例
+curl -X POST http://localhost:8000/predict -F "file=@C:\Users\你的名字\Pictures\我的數字.png"
 
-# Run the container
-docker run -d -p 8000:8000 --name mnist mnist-api
-
-# Verify health
-curl http://localhost:8000/health
+# Mac 範例
+curl -X POST http://localhost:8000/predict -F "file=@/Users/你的名字/Pictures/我的數字.png"
 ```
 
-### Local Development
+### 方法三：使用網頁介面（最直覺）
+
+打開瀏覽器，輸入網址：
+
+```
+http://localhost:8000/docs
+```
+
+這會開啟一個互動式的 API 文件頁面：
+
+1. 找到 **POST /predict** 這一項，點擊展開
+2. 點擊右邊的 **Try it out** 按鈕
+3. 在 **file** 欄位點擊 **選擇檔案**，選擇你要辨識的圖片
+4. 點擊下方藍色的 **Execute** 按鈕
+5. 往下滾動，在 **Response body** 看到辨識結果！
+
+### 方法四：使用 Postman（適合想深入測試的人）
+
+專案裡有準備好的 Postman 測試檔案，在 `postman/` 資料夾裡。
+
+---
+
+## 常用的管理指令
+
+### 查看服務狀態
 
 ```bash
-# Install dependencies
-pip install -r requirements.txt
-
-# Run the application
-fastapi run app/main.py --port 8000
-```
-
-Note: Requires Python 3.13+ and model_weights.pth in the project root.
-
-## Usage
-
-### Predict Digit from Image
-
-**Using curl:**
-
-```bash
-curl -X POST http://localhost:8000/predict \
-  -F "file=@/path/to/your/image.png"
-```
-
-Example response:
-```json
-{
-  "digit": 7,
-  "confidence": 0.9912
-}
-```
-
-**Using Python requests:**
-
-```python
-import requests
-
-# Predict from file
-with open('digit_image.png', 'rb') as f:
-    response = requests.post(
-        'http://localhost:8000/predict',
-        files={'file': f}
-    )
-
-result = response.json()
-print(f"Predicted digit: {result['digit']}")
-print(f"Confidence: {result['confidence']:.4f}")
-```
-
-**Using Python with image URL:**
-
-```python
-import requests
-from io import BytesIO
-
-# Download image from URL
-image_url = 'https://example.com/digit.jpg'
-image_data = requests.get(image_url).content
-
-# Send to API
-response = requests.post(
-    'http://localhost:8000/predict',
-    files={'file': ('image.jpg', BytesIO(image_data), 'image/jpeg')}
-)
-
-result = response.json()
-print(f"Digit: {result['digit']}, Confidence: {result['confidence']:.2%}")
-```
-
-### Health Check
-
-```bash
-curl http://localhost:8000/health
-```
-
-Response:
-```json
-{"status": "ok"}
-```
-
-## API Reference
-
-### POST /predict
-
-Predict the digit from an uploaded image.
-
-**Request:**
-- Method: `POST`
-- Content-Type: `multipart/form-data`
-- Body: `file` (form field) - Image file (JPEG or PNG)
-
-**Response:**
-```json
-{
-  "digit": 6,
-  "confidence": 0.9823
-}
-```
-
-**Fields:**
-- `digit` (integer): Predicted digit, range 0-9
-- `confidence` (float): Prediction confidence score, range 0.0-1.0
-
-**Supported Image Formats:**
-- JPEG (image/jpeg)
-- PNG (image/png)
-
-**Image Processing:**
-- Any input size accepted
-- Automatically resized to 28x28 pixels
-- Automatically converted to grayscale
-- Normalized for model input
-
-**Error Responses:**
-
-400 Bad Request - Invalid file type:
-```json
-{
-  "detail": "Invalid file type: image/gif. Only JPEG and PNG are supported."
-}
-```
-
-400 Bad Request - Image processing error:
-```json
-{
-  "detail": "Error processing image: [error message]"
-}
-```
-
-### GET /health
-
-Check service health status.
-
-**Request:**
-- Method: `GET`
-- No parameters required
-
-**Response:**
-```json
-{"status": "ok"}
-```
-
-**Use Cases:**
-- Container health checks
-- Load balancer health probes
-- Service monitoring
-
-## Model Information
-
-### Architecture
-
-The API uses a CNN-Transformer hybrid architecture for digit recognition:
-
-- **Convolutional Layers**: 2 CNN layers for feature extraction
-  - Conv1: 1 → 32 channels, 3x3 kernel
-  - Conv2: 32 → 64 channels, 3x3 kernel
-  - MaxPooling after each layer
-- **Transformer Encoder**: Attention mechanism for pattern recognition
-  - 4 attention heads
-  - 2 encoder layers
-  - Dimension: 128
-- **Classification Head**: Fully connected layers
-  - Final output: 10 classes (digits 0-9)
-
-### Input Specifications
-
-- **Input Format**: 28x28 grayscale images
-- **Preprocessing**:
-  - Auto-resize from any input dimension
-  - Auto-convert to grayscale
-  - Tensor normalization
-- **Output**: Digit prediction (0-9) with softmax confidence
-
-### Model Performance
-
-- Trained on MNIST dataset
-- Inference time: ~50-100ms per image (CPU)
-- Model size: ~2MB (model_weights.pth)
-
-## Docker
-
-### Build Image
-
-```bash
-docker build -t mnist-api .
-```
-
-Image details:
-- Base: python:3.13-slim
-- Size: ~1.59GB
-- Non-root user: appuser (uid 1000)
-- Port: 8000
-
-### Run Container
-
-```bash
-# Run in detached mode
-docker run -d -p 8000:8000 --name mnist mnist-api
-
-# Run with custom name and port
-docker run -d -p 9000:8000 --name my-mnist-api mnist-api
-```
-
-### Health Check
-
-The container includes automatic health monitoring:
-
-```bash
-# Check container health status
+# 查看正在執行的容器
 docker ps
 
-# View health check logs
-docker inspect --format='{{json .State.Health}}' mnist | python -m json.tool
+# 你會看到類似這樣的資訊：
+# CONTAINER ID   IMAGE       STATUS          PORTS                    NAMES
+# abc123def      mnist-api   Up 5 minutes    0.0.0.0:8000->8000/tcp   mnist
 ```
 
-Health check configuration:
-- Interval: 30 seconds
-- Timeout: 10 seconds
-- Retries: 3
-- Start period: 40 seconds (allows model loading)
+### 查看服務記錄
 
-### Container Management
+如果遇到問題，可以看看服務記錄找線索：
 
 ```bash
-# View logs
 docker logs mnist
-
-# Stop container
-docker stop mnist
-
-# Remove container
-docker rm mnist
-
-# View resource usage
-docker stats mnist
 ```
 
-### Access API Documentation
+### 停止服務
 
-Once running, visit:
-- Interactive API docs: http://localhost:8000/docs
-- Alternative docs: http://localhost:8000/redoc
+```bash
+docker stop mnist
+```
 
-## Project Structure
+### 重新啟動服務
+
+```bash
+docker start mnist
+```
+
+### 完全移除服務
+
+如果想重新來過，或是不需要這個服務了：
+
+```bash
+# 先停止
+docker stop mnist
+
+# 再移除
+docker rm mnist
+```
+
+---
+
+## 圖片要求與限制
+
+這個服務可以處理各種圖片，但為了得到最好的辨識效果：
+
+### 支援的格式
+- **JPEG**（.jpg, .jpeg）
+- **PNG**（.png）
+
+### 圖片會被自動處理
+- 自動調整大小為 28x28 像素
+- 自動轉換為灰階（黑白）
+- 自動標準化數值
+
+### 辨識效果最佳的圖片
+- 白色或淺色背景
+- 深色（最好是黑色）的數字
+- 數字佔圖片大部分面積
+- 數字清晰、不模糊
+
+---
+
+## 專案檔案結構
 
 ```
 .
-├── app/
+├── app/                    # 程式碼資料夾
 │   ├── __init__.py
-│   ├── main.py          # FastAPI application and endpoints
-│   ├── model.py         # CNN-Transformer model architecture
-│   └── schemas.py       # Pydantic response models
-├── saved_images/        # Example test images
-├── Dockerfile           # Container definition
-├── requirements.txt     # Python dependencies
-├── model_weights.pth    # Trained model weights
-└── README.md           # This file
+│   ├── main.py            # 主程式，處理 API 請求
+│   ├── model.py           # AI 模型的程式碼
+│   └── schemas.py         # 定義資料格式
+├── saved_images/          # 測試用的範例圖片
+├── postman/               # Postman 測試檔案
+├── Dockerfile             # Docker 設定檔
+├── requirements.txt       # Python 套件清單
+├── model_weights.pth      # AI 模型的權重檔案（大腦）
+└── README.md              # 就是這份說明文件
 ```
 
-## Testing
+---
 
-Example test images are provided in the `saved_images/` directory:
+## 常見問題排解
+
+### Q: 執行 `docker build` 時出現錯誤？
+
+**可能原因**：Docker Desktop 沒有啟動
+
+**解決方法**：
+1. 確認 Docker Desktop 正在執行（系統列會有鯨魚圖示）
+2. 如果沒有，啟動 Docker Desktop，等待它完全啟動後再試一次
+
+### Q: 執行 `curl` 出現「無法連線」？
+
+**可能原因**：服務還沒完全啟動，或是服務沒有在執行
+
+**解決方法**：
+1. 確認服務正在執行：`docker ps` 看看有沒有 `mnist`
+2. 如果沒有，執行 `docker start mnist` 啟動它
+3. 等待 40 秒讓 AI 模型載入
+
+### Q: 辨識結果不正確？
+
+**可能原因**：圖片不符合模型訓練的特性
+
+**解決方法**：
+1. 確保數字是深色的，背景是淺色的
+2. 數字要清晰、不模糊
+3. 數字最好在圖片中央，佔大部分面積
+4. 這個模型是用手寫數字訓練的，印刷體數字可能效果較差
+
+### Q: 想換個 Port 執行？
+
+如果 8000 port 被其他程式佔用了：
 
 ```bash
-# Test with provided examples
-for img in saved_images/*.png; do
-    echo "Testing: $img"
-    curl -X POST http://localhost:8000/predict -F "file=@$img"
-    echo ""
-done
+# 先停止並移除舊的
+docker stop mnist && docker rm mnist
+
+# 用不同的 port 執行（例如 9000）
+docker run -d -p 9000:8000 --name mnist mnist-api
+
+# 之後存取時改用 9000
+curl http://localhost:9000/health
 ```
 
-For comprehensive API testing, see the Postman collection in `postman/MNIST_API_Collection.json`.
+---
 
-## Troubleshooting
+## 技術細節（給有興趣的人）
 
-**Container fails to start:**
-- Check Docker logs: `docker logs mnist`
-- Verify model_weights.pth exists in build context
-- Ensure port 8000 is not already in use
+### AI 模型架構
 
-**Health check failing:**
-- Wait 40 seconds after startup for model loading
-- Check logs for errors: `docker logs mnist`
-- Verify health endpoint manually: `curl http://localhost:8000/health`
+這個專案使用 **CNN-Transformer** 混合架構：
 
-**Prediction errors:**
-- Verify image format is JPEG or PNG
-- Check image file is not corrupted
-- Review error message in API response
+- **卷積層（CNN）**：用來提取圖片的特徵
+  - 第一層：1 → 32 個濾波器
+  - 第二層：32 → 64 個濾波器
 
-**Performance issues:**
-- Container uses CPU inference (PyTorch CPU version)
-- Expected latency: 50-100ms per prediction
-- For GPU acceleration, modify requirements.txt and Dockerfile
+- **Transformer 編碼器**：用來理解特徵之間的關係
+  - 4 個注意力頭
+  - 2 層編碼器
 
-## Technical Details
+- **分類層**：輸出 0-9 的機率分布
 
-### Dependencies
+### 效能資訊
 
-Core dependencies (see requirements.txt for versions):
-- fastapi[standard]>=0.115.0 - Web framework and server
-- torch (CPU version) - Neural network inference
-- torchvision - Image transformations
-- Pillow - Image processing
-- pydantic>=2.0.0 - Data validation
+- **啟動時間**：約 30-40 秒（載入 AI 模型）
+- **辨識速度**：每張圖片約 50-100 毫秒
+- **記憶體用量**：約 500MB
+- **Docker 映像大小**：約 1.59GB
 
-### Performance
+### 安全性設計
 
-- Startup time: ~30-40 seconds (model loading)
-- Prediction latency: 50-100ms (CPU inference)
-- Memory usage: ~500MB per container
-- Concurrent requests: Supported via Uvicorn workers
+- 使用非 root 用戶執行
+- 只接受 JPEG 和 PNG 格式
+- 不儲存任何上傳的圖片
+- 無狀態設計，可水平擴展
 
-### Security
+---
 
-- Runs as non-root user (appuser, uid 1000)
-- Input validation on content types
-- Error handling for malformed images
-- No persistent data storage
-- Stateless design for horizontal scaling
+## 授權說明
 
-## License
+此專案為技術能力展示作品。
 
-This project is part of a technical assessment.
+---
+
+## 需要幫助？
+
+如果遇到任何問題，歡迎在 GitHub 上開 Issue 詢問！
