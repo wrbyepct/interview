@@ -51,10 +51,10 @@ docker --version
 
 ```bash
 # 下載專案到你的電腦
-git clone https://github.com/你的帳號/你的專案名稱.git
+git clone https://github.com/wrbyepct/interview
 
 # 進入專案資料夾
-cd 你的專案名稱
+cd interview
 ```
 
 > **小提示**：請把上面的網址換成實際的 GitHub 網址
