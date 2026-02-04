@@ -14,7 +14,7 @@ ml_models = {}
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
+async def lifespan(_app: FastAPI):
     """Load model at startup, clean up at shutdown"""
     # Startup: Load model once per worker
     model = CNNTransformer()
